@@ -35,11 +35,18 @@ export function setupFromFunctions(...functions) {
     return Promise.resolve(programState);
 }
 
+
+export function renkonify(main, app) {
+    const programState = new ProgramState(Date.now(), app, true);
+    programState.merge(main);
+    return Promise.resolve(programState).then(loop);
+}
+
 export function loop(programState) {
     programState.noTickingEvaluator();
     return new Promise((resolve) => setTimeout(() => {
         resolve(true);
-    }, 1000)).then((v) => loop(programState));
+    }, 1000)).then((_v) => loop(programState));
 }
 
 export function mergeFunctions(...functions) {
@@ -49,3 +56,5 @@ export function mergeFunctions(...functions) {
 export function mergeFiles(...fileNames) {
     return getFunctions(fileNames).then(mergeFunctions);
 }
+
+/* globals process */
