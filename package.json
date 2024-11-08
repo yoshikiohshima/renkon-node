@@ -1,10 +1,11 @@
 {
   "name": "renkon-node",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "index.js",
   "license": "MIT",
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "dependencies": {
     "renkon": "0.1.6"
