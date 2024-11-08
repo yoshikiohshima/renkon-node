@@ -1,6 +1,14 @@
-import {ProgramState} from "renkon";
+'use strict'
 
-export function getFunctions(optFileNames) {
+let modPromise;
+
+async function getProgramState() {
+    if (modPromise) {return (await modPromise).ProgramState;}
+    modPromise = import("renkon");
+    return (await modPromise).ProgramState;
+}
+    
+function getFunctions(optFileNames) {
     let fileNames = optFileNames;
     if (!fileNames) {
         const index = process.argv.lastIndexOf("--");
@@ -18,7 +26,6 @@ export function getFunctions(optFileNames) {
  
         modules.forEach((module) => {
             const keys = Object.keys(module);
-
             for (const key of keys) {
                 if (typeof module[key] === "function") {
                     funcs.push(module[keys]);
@@ -29,32 +36,42 @@ export function getFunctions(optFileNames) {
     });
 }
 
-export function setupFromFunctions(...functions) {
+async function setupFromFunctions(...functions) {
+    const ProgramState = await getProgramState();
     const programState = new ProgramState(Date.now(), null, true);
     programState.merge(...functions);
-    return Promise.resolve(programState);
+    return programState;
 }
 
-
-export function renkonify(main, app) {
+async function renkonify(main, app) {
+    const ProgramState = await getProgramState();
     const programState = new ProgramState(Date.now(), app, true);
     programState.merge(main);
-    return Promise.resolve(programState).then(loop);
+    Promise.resolve(programState).then(loop);
+    return programState;
 }
 
-export function loop(programState) {
+function loop(programState) {
     programState.noTickingEvaluator();
     return new Promise((resolve) => setTimeout(() => {
         resolve(true);
     }, 1000)).then((_v) => loop(programState));
 }
 
-export function mergeFunctions(...functions) {
+function mergeFunctions(...functions) {
     return setupFromFunctions(...functions).then(loop);
 }
 
-export function mergeFiles(...fileNames) {
+function mergeFiles(...fileNames) {
     return getFunctions(fileNames).then(mergeFunctions);
 }
 
-/* globals process */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getProgramState = getProgramState;
+exports.getFunctions = getFunctions;
+exports.setupFromFunctions = setupFromFunctions;
+exports.renkonify = renkonify;
+exports.mergeFunctions = mergeFunctions;
+exports.mergeFiles = mergeFiles;
+
+/* globals process exports */

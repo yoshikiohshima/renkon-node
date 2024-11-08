@@ -1,7 +1,6 @@
 {
   "name": "renkon-node",
-  "version": "0.1.6",
-  "type": "module",
+  "version": "0.1.7",
   "main": "index.js",
   "license": "MIT",
   "files": [
