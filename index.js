@@ -1,14 +1,7 @@
-'use strict'
+import {ProgramState} from "renkon-core";
+export {ProgramState} from "renkon-core";
 
-let modPromise;
-
-async function getProgramState() {
-    if (modPromise) {return (await modPromise).ProgramState;}
-    modPromise = import("renkon");
-    return (await modPromise).ProgramState;
-}
-    
-function getFunctions(optFileNames) {
+export function getFunctions(optFileNames) {
     let fileNames = optFileNames;
     if (!fileNames) {
         const index = process.argv.lastIndexOf("--");
@@ -36,19 +29,16 @@ function getFunctions(optFileNames) {
     });
 }
 
-async function setupFromFunctions(...functions) {
-    const ProgramState = await getProgramState();
-    const programState = new ProgramState(Date.now(), null, true);
+export function mergeFunctions(programState, ...functions) {
     programState.merge(...functions);
+    Promise.resolve(programState).then(loop);
     return programState;
 }
 
-async function renkonify(main, app) {
-    const ProgramState = await getProgramState();
-    const programState = new ProgramState(Date.now(), app, true);
-    programState.merge(main);
-    Promise.resolve(programState).then(loop);
-    return programState;
+export function mergeFiles(programState, ...fileNames) {
+    return getFunctions(fileNames).then((funcs) => {
+        return mergeFunctions(programState, ...funcs);
+    });
 }
 
 function loop(programState) {
@@ -58,20 +48,4 @@ function loop(programState) {
     }, 1000)).then((_v) => loop(programState));
 }
 
-function mergeFunctions(...functions) {
-    return setupFromFunctions(...functions).then(loop);
-}
-
-function mergeFiles(...fileNames) {
-    return getFunctions(fileNames).then(mergeFunctions);
-}
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProgramState = getProgramState;
-exports.getFunctions = getFunctions;
-exports.setupFromFunctions = setupFromFunctions;
-exports.renkonify = renkonify;
-exports.mergeFunctions = mergeFunctions;
-exports.mergeFiles = mergeFiles;
-
-/* globals process exports */
+/* globals process */

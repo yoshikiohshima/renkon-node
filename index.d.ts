@@ -1,4 +1,4 @@
-import {ProgramState} from "renkon";
+import {ProgramState} from "renkon-core";
 
 export class RenkonNode {
     setupFromFunctions(...functions:Array<Function>):Promise<ProgramState>
